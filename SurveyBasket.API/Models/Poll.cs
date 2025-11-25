@@ -1,4 +1,6 @@
-﻿namespace SurveyBasket.Models;
+﻿using SurveyBasket.Contracts.Response;
+
+namespace SurveyBasket.Models;
 
 public class Poll
 {
