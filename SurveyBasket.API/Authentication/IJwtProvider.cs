@@ -3,4 +3,6 @@
 public interface IJwtProvider
 {
     (string token, int expiresIn) generateToken(ApplicationUser user);
+
+    string? ValidateToken(string token);
 }
