@@ -1,9 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using SurveyBasket;
-using SurveyBasket.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddDependencies(builder.Configuration);
 
@@ -19,6 +16,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
 
 app.MapControllers();
 
