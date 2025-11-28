@@ -1,7 +1,4 @@
-﻿
-using FluentValidation;
-
-namespace SurveyBasket.Contracts.Polls;
+﻿namespace SurveyBasket.Contracts.Polls;
 
 public class LoginRequestValidator : AbstractValidator<PollRequest>
 {
@@ -9,10 +6,11 @@ public class LoginRequestValidator : AbstractValidator<PollRequest>
     {
         RuleFor(x => x.Title)
             .NotEmpty()
-            .Length(3,100);
+            .Length(3, 100);
+
         RuleFor(x => x.Summary)
             .NotEmpty()
-            .Length(3,1500);
+            .Length(3, 1500);
 
         RuleFor(x => x.StartsAt)
             .NotEmpty()
@@ -20,13 +18,15 @@ public class LoginRequestValidator : AbstractValidator<PollRequest>
 
         RuleFor(x => x.EndsAt)
             .NotEmpty();
+
         RuleFor(x => x)
-            .Must(HasValidEndDate)
+            .Must(HasValidDates)
             .WithName(nameof(PollRequest.EndsAt))
-            .WithMessage("{PropertyName} must be greater than or equal to start date");
-    }   
-    private bool HasValidEndDate(PollRequest request)
+            .WithMessage("{PropertyName} must be greater than or equals start date");
+    }
+
+    private bool HasValidDates(PollRequest pollRequest)
     {
-        return request.EndsAt >= request.StartsAt;
+        return pollRequest.EndsAt >= pollRequest.StartsAt;
     }
 }

@@ -1,73 +1,73 @@
-﻿using SurveyBasket.Entities;
-
-namespace SurveyBasket.Services;
+﻿namespace SurveyBasket.Services;
 
 public class PollService(ApplicationDbContext context) : IPollService
 {
     private readonly ApplicationDbContext _context = context;
-    public async Task<IEnumerable<Poll>> GetAllAsync(CancellationToken cancellationToken = default) => 
+
+    public async Task<IEnumerable<Poll>> GetAllAsync(CancellationToken cancellationToken = default) =>
         await _context.Polls.AsNoTracking().ToListAsync(cancellationToken);
 
-    public async Task<Poll?> GetAsync(int id, CancellationToken cancellationToken = default) =>
-        await _context.Polls.FindAsync(id, cancellationToken);
-
-    public async Task<Poll?> AddAsync(Poll poll, CancellationToken cancellationToken = default)
+    public async Task<Result<PollResponse>> GetAsync(int id, CancellationToken cancellationToken = default)
     {
-        await _context.Polls.AddAsync(poll, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
-        return poll;
+        var poll = await _context.Polls.FindAsync(id, cancellationToken);
+
+        return poll is not null
+            ? Result.Success(poll.Adapt<PollResponse>())
+            : Result.Failure<PollResponse>(PollErrors.PollNotFound);
     }
 
-    public async Task<bool> UpdateAsync(int id, Poll poll, CancellationToken cancellationToken = default)
+    public async Task<PollResponse> AddAsync(PollRequest request, CancellationToken cancellationToken = default)
     {
-        var existingpoll = await GetAsync(id, cancellationToken);
+        var poll = request.Adapt<Poll>();
 
-        if (existingpoll is null)   
-        {
-            return false;
-        }
+        await _context.AddAsync(poll, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
-        if (!string.IsNullOrEmpty(poll.Title))
-            existingpoll.Title = poll.Title;
+        return poll.Adapt<PollResponse>();
+    }
 
-        if (!string.IsNullOrEmpty(poll.Summary))
-            existingpoll.Summary = poll.Summary;
+    public async Task<Result> UpdateAsync(int id, PollRequest poll, CancellationToken cancellationToken = default)
+    {
+        var currentPoll = await _context.Polls.FindAsync(id, cancellationToken);
 
-            existingpoll.StartsAt = poll.StartsAt;
+        if (currentPoll is null)
+            return Result.Failure(PollErrors.PollNotFound);
 
-            existingpoll.EndsAt = poll.EndsAt;
+        currentPoll.Title = poll.Title;
+        currentPoll.Summary = poll.Summary;
+        currentPoll.StartsAt = poll.StartsAt;
+        currentPoll.EndsAt = poll.EndsAt;
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Result.Success();
     }
 
-    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
-        var poll = await GetAsync(id, cancellationToken);
+        var poll = await _context.Polls.FindAsync(id, cancellationToken);
+
         if (poll is null)
-        {
-            return false;
-        }
+            return Result.Failure(PollErrors.PollNotFound);
+
         _context.Remove(poll);
 
         await _context.SaveChangesAsync(cancellationToken);
-        return true;
+
+        return Result.Success();
     }
-    public async Task<bool> TogglePublishStatusAsync(int id, CancellationToken cancellationToken = default)
+
+    public async Task<Result> TogglePublishStatusAsync(int id, CancellationToken cancellationToken = default)
     {
-        var poll = await GetAsync(id, cancellationToken);
+        var poll = await _context.Polls.FindAsync(id, cancellationToken);
 
         if (poll is null)
-        {
-            return false;
-        }
-        poll.IsPublished = !poll.IsPublished;
+            return Result.Failure(PollErrors.PollNotFound);
 
+        poll.IsPublished = !poll.IsPublished;
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Result.Success();
     }
-
 }

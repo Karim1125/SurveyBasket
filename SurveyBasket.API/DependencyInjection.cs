@@ -1,5 +1,4 @@
-﻿using MapsterMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
@@ -15,6 +14,14 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddControllers();
+
+        services.AddCors(options =>
+            options.AddDefaultPolicy(builder =>
+                builder.AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .WithOrigins(configuration.GetSection("AllowedOrigins").Get<string[]>()!)
+            )
+        );
 
         services.AddAuthConfig(configuration);
 
