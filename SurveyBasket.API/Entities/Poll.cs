@@ -8,4 +8,6 @@ public sealed class Poll : AuditableEntity
     public bool IsPublished { get; set; }
     public DateOnly StartsAt { get; set; }
     public DateOnly EndsAt { get; set; }
+
+    public ICollection<Question> questions { get; set; } = [];
 }
