@@ -1,8 +1,8 @@
 ﻿namespace SurveyBasket.Contracts.Questions;
 
-public class QuestionRequestValidator : AbstractValidator<QuestionRequest>
+public class VoteAnswerRequestValidator : AbstractValidator<QuestionRequest>
 {
-    public QuestionRequestValidator()
+    public VoteAnswerRequestValidator()
     {
         RuleFor(x => x.Content)
             .NotEmpty()
