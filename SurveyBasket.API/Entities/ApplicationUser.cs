@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-
-namespace SurveyBasket.Entities;
+﻿namespace SurveyBasket.Entities;
 
 public sealed class ApplicationUser : IdentityUser
 {

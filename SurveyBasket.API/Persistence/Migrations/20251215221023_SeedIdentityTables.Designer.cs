@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SurveyBasket.Persistence;
 
@@ -11,9 +12,11 @@ using SurveyBasket.Persistence;
 namespace SurveyBasket.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251215221023_SeedIdentityTables")]
+    partial class SeedIdentityTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -402,7 +405,7 @@ namespace SurveyBasket.Persistence.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@SURVEY-BASKET.COM",
                             NormalizedUserName = "ADMIN@SURVEY-BASKET.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDs4pu4DaxbCU7IR/TrHBKM778//45C689Q0CUXZGB+ZbCSKuDYLatknRa9fn7Xisg==",
+                            PasswordHash = "Microsoft.AspNetCore.Identity.PasswordHasher`1[SurveyBasket.Entities.ApplicationUser]",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "55BF92C9EF0249CDA210D85D1A851BC9",
                             TwoFactorEnabled = false,

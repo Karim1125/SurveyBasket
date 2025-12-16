@@ -1,5 +1,4 @@
 using Hangfire;
-using Hangfire.Dashboard;
 using HangfireBasicAuthenticationFilter;
 using Serilog;
 using SurveyBasket;
@@ -14,7 +13,7 @@ builder.Host.UseSerilog((context, configuration) =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

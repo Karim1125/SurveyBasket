@@ -1,6 +1,5 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
@@ -49,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<IQuestionService, QuestionService>();
         services.AddScoped<IVoteService, VoteService>();
         services.AddScoped<IResultService, ResultService>();
+        services.AddScoped<IUserService, UserService>();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
@@ -92,9 +92,12 @@ public static class DependencyInjection
     private static IServiceCollection AddAuthConfig(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddIdentity<ApplicationUser, IdentityRole>()
+        services.AddIdentity<ApplicationUser, ApplicationRole>()
           .AddEntityFrameworkStores<ApplicationDbContext>()
           .AddDefaultTokenProviders();
+
+        services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
 
         services.AddSingleton<IJwtProvider, JwtProvider>();
