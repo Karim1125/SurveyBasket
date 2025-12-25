@@ -1,13 +1,10 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Identity.Client;
 using SurveyBasket.Authentication;
 using SurveyBasket.Helpers;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 
 namespace SurveyBasket.Services;
 
