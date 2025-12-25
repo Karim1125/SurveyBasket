@@ -1,4 +1,7 @@
-﻿using Hangfire;
+﻿using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
+using Hangfire;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.RateLimiting;
@@ -6,8 +9,11 @@ using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using SurveyBasket.Authentication;
 using SurveyBasket.Health;
+using SurveyBasket.OpenAPITransformers;
+using SurveyBasket.OpenApiTransformers;
 using SurveyBasket.Settings;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -40,7 +46,7 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString));
 
         services
-            .AddSwaggerServices()
+            //.AddSwaggerServices()
             .AddMapsterConfig()
             .AddFluentValidationConfig();
 
@@ -69,17 +75,78 @@ public static class DependencyInjection
 
         services.AddRateLimitingConfig();
 
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1.0);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+
+            options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+        })
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'V";
+            options.SubstituteApiVersionInUrl = true;
+        });
+
+        services
+            .AddEndpointsApiExplorer()
+            .AddOpenApiServices();
+
         return services;
     }
 
-    private static IServiceCollection AddSwaggerServices(this IServiceCollection services)
+    private static IServiceCollection AddOpenApiServices(this IServiceCollection services)
     {
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        var serviceProvider = services.BuildServiceProvider();
+        var apiVersionDescriptionProvider = serviceProvider.GetRequiredService<IApiVersionDescriptionProvider>();
+
+        foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+        {
+            services.AddOpenApi(description.GroupName, options =>
+            {
+                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+                options.AddDocumentTransformer(new ApiVersioningTransformer(description));
+            });
+        }
 
         return services;
     }
+
+    //private static IServiceCollection AddSwaggerServices(this IServiceCollection services)
+    //{
+    //    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+    //    services.AddSwaggerGen(options =>
+    //    {
+    //        //options.SwaggerDoc("v1", new OpenApiInfo
+    //        //{
+    //        //    Version = "v1",
+    //        //    Title = "ToDo API",
+    //        //    Description = "An ASP.NET Core Web API for managing ToDo items",
+    //        //    TermsOfService = new Uri("https://example.com/terms"),
+    //        //    Contact = new OpenApiContact
+    //        //    {
+    //        //        Name = "Example Contact",
+    //        //        Url = new Uri("https://example.com/contact")
+    //        //    },
+    //        //    License = new OpenApiLicense
+    //        //    {
+    //        //        Name = "Example License",
+    //        //        Url = new Uri("https://example.com/license")
+    //        //    }
+    //        //});
+
+    //        var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    //        options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+
+    //        options.OperationFilter<SwaggerDefaultValues>();
+    //    });
+
+    //    services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+
+    //    return services;
+    //}
 
     private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
     {

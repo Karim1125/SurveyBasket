@@ -2,6 +2,7 @@ using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Scalar.AspNetCore;
 using Serilog;
 using SurveyBasket;
 
@@ -18,8 +19,10 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+    //app.UseSwagger();
+    //app.UseSwaggerUI();
 }
 
 app.UseSerilogRequestLogging();
