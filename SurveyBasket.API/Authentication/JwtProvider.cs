@@ -1,5 +1,4 @@
-﻿
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -18,24 +17,24 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
             new(JwtRegisteredClaimNames.Email, user.Email!),
             new(JwtRegisteredClaimNames.GivenName, user.FirstName),
             new(JwtRegisteredClaimNames.FamilyName, user.LastName),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(nameof(roles),JsonSerializer.Serialize(roles), JsonClaimValueTypes.JsonArray),
-            new(nameof(permissions),JsonSerializer.Serialize(permissions), JsonClaimValueTypes.JsonArray),
+            new(JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString()),
+            new(nameof(roles), JsonSerializer.Serialize(roles), JsonClaimValueTypes.JsonArray),
+            new(nameof(permissions), JsonSerializer.Serialize(permissions), JsonClaimValueTypes.JsonArray)
         ];
 
         var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
 
-        var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
+        var singingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: _options.Issuer,
             audience: _options.Audience,
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(_options.ExpiryMinutes),
-            signingCredentials: signingCredentials
+            signingCredentials: singingCredentials
         );
 
-        return (new JwtSecurityTokenHandler().WriteToken(token), _options.ExpiryMinutes * 60);
+        return (token: new JwtSecurityTokenHandler().WriteToken(token), expiresIn: _options.ExpiryMinutes * 60);
     }
 
     public string? ValidateToken(string token)
@@ -56,7 +55,7 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 
             var jwtToken = (JwtSecurityToken)validatedToken;
 
-            return jwtToken.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
+            return jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
         }
         catch
         {

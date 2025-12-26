@@ -7,7 +7,6 @@ namespace SurveyBasket.Controllers;
 [EnableRateLimiting("ipLimit")]
 public class AuthController(IAuthService authService, ILogger<AuthController> logger) : ControllerBase
 {
-
     private readonly IAuthService _authService = authService;
     private readonly ILogger<AuthController> _logger = logger;
 
@@ -62,7 +61,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
         return result.IsSuccess ? Ok() : result.ToProblem();
     }
 
-    [HttpPost("forget-password")] 
+    [HttpPost("forget-password")]
     public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequest request)
     {
         var result = await _authService.SendResetPasswordCodeAsync(request.Email);

@@ -2,7 +2,7 @@
 
 namespace SurveyBasket.Services;
 
-public class UserService(UserManager<ApplicationUser> userManager,IRoleService roleService, ApplicationDbContext context) : IUserService
+public class UserService(UserManager<ApplicationUser> userManager, IRoleService roleService, ApplicationDbContext context) : IUserService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly IRoleService _roleService = roleService;
@@ -11,20 +11,20 @@ public class UserService(UserManager<ApplicationUser> userManager,IRoleService r
     public async Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await (from u in _context.Users
-                        join ur in _context.UserRoles
-                        on u.Id equals ur.UserId
-                        join r in _context.Roles
-                        on ur.RoleId equals r.Id into roles
-                        where !roles.Any(x => x.Name == DefaultRoles.Member)
-                        select new
-                        {
-                            u.Id,
-                            u.FirstName,
-                            u.LastName,
-                            u.Email,
-                            u.IsDisabled,
-                            Roles = roles.Select(x => x.Name!).ToList()
-                        }
+                      join ur in _context.UserRoles
+                      on u.Id equals ur.UserId
+                      join r in _context.Roles
+                      on ur.RoleId equals r.Id into roles
+                      where !roles.Any(x => x.Name == DefaultRoles.Member.Name)
+                      select new
+                      {
+                          u.Id,
+                          u.FirstName,
+                          u.LastName,
+                          u.Email,
+                          u.IsDisabled,
+                          Roles = roles.Select(x => x.Name!).ToList()
+                      }
                     )
         .GroupBy(u => new { u.Id, u.FirstName, u.LastName, u.Email, u.IsDisabled })
         .Select(g => new UserResponse
@@ -56,12 +56,12 @@ public class UserService(UserManager<ApplicationUser> userManager,IRoleService r
     {
         var emailIsExists = await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
 
-        if(emailIsExists)
+        if (emailIsExists)
             return Result.Failure<UserResponse>(UserErrors.DuplicatedEmail);
 
         var allowedRoles = await _roleService.GetAllAsync(cancellationToken: cancellationToken);
 
-        if(request.Roles.Except(allowedRoles.Select(x => x.Name)).Any())
+        if (request.Roles.Except(allowedRoles.Select(x => x.Name)).Any())
             return Result.Failure<UserResponse>(UserErrors.InvalidRoles);
 
         var user = request.Adapt<ApplicationUser>();
@@ -82,19 +82,19 @@ public class UserService(UserManager<ApplicationUser> userManager,IRoleService r
         return Result.Failure<UserResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
     }
 
-    public async Task<Result> UpdateAsync(string Id,UpdateUserRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result> UpdateAsync(string Id, UpdateUserRequest request, CancellationToken cancellationToken = default)
     {
         var emailIsExists = await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
 
-        if(emailIsExists)
+        if (emailIsExists)
             return Result.Failure(UserErrors.DuplicatedEmail);
 
         var allowedRoles = await _roleService.GetAllAsync(cancellationToken: cancellationToken);
 
-        if(request.Roles.Except(allowedRoles.Select(x => x.Name)).Any())
+        if (request.Roles.Except(allowedRoles.Select(x => x.Name)).Any())
             return Result.Failure(UserErrors.InvalidRoles);
 
-        if(await _userManager.FindByIdAsync(Id) is not { } user)
+        if (await _userManager.FindByIdAsync(Id) is not { } user)
             return Result.Failure(UserErrors.UserNotFound);
 
         user = request.Adapt(user);
@@ -126,7 +126,7 @@ public class UserService(UserManager<ApplicationUser> userManager,IRoleService r
 
         var result = await _userManager.UpdateAsync(user);
 
-        if(result.Succeeded)
+        if (result.Succeeded)
             return Result.Success();
 
         var error = result.Errors.First();
@@ -139,17 +139,15 @@ public class UserService(UserManager<ApplicationUser> userManager,IRoleService r
         if (await _userManager.FindByIdAsync(id) is not { } user)
             return Result.Failure<UserResponse>(UserErrors.UserNotFound);
 
-
         var result = await _userManager.SetLockoutEndDateAsync(user, null);
 
-        if(result.Succeeded)
+        if (result.Succeeded)
             return Result.Success();
 
         var error = result.Errors.First();
 
         return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
     }
-
 
     public async Task<Result<UserProfileResponse>> GetProfileAsync(string userId)
     {
@@ -163,12 +161,6 @@ public class UserService(UserManager<ApplicationUser> userManager,IRoleService r
 
     public async Task<Result> UpdateProfileAsync(string userId, UpdateProfileRequest request)
     {
-        //var user = await _userManager.FindByIdAsync(userId);
-
-        //user = request.Adapt(user);
-
-        //await _userManager.UpdateAsync(user!);
-
         await _userManager.Users
             .Where(u => u.Id == userId)
             .ExecuteUpdateAsync(setters =>

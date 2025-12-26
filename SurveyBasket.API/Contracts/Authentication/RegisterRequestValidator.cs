@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Abstractions.Consts;
-
-namespace SurveyBasket.Contracts.Authentication;
+﻿namespace SurveyBasket.Contracts.Authentication;
 
 public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 {
@@ -13,13 +11,13 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
             .NotEmpty()
             .Matches(RegexPatterns.Password)
             .WithMessage("Password should be at least 8 digits and contains lowercase, uppercase, and Non-alphaneumeric");
-        
+
         RuleFor(x => x.FirstName)
             .NotEmpty()
-            .Length(3,100);
-        
+            .Length(3, 100);
+
         RuleFor(x => x.LastName)
             .NotEmpty()
-            .Length(3,100);
+            .Length(3, 100);
     }
 }

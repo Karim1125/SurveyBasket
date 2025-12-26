@@ -33,7 +33,6 @@ internal sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvi
                     [new OpenApiSecuritySchemeReference("Bearer", document)] = []
                 });
             }
-
         }
     }
 }

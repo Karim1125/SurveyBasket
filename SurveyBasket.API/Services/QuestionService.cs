@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Hybrid;
-using System.Linq.Dynamic.Core;
 using SurveyBasket.Contracts.Common;
 using SurveyBasket.Contracts.Questions;
+using System.Linq.Dynamic.Core;
 
 namespace SurveyBasket.Services;
 
@@ -31,7 +31,7 @@ public class QuestionService(ApplicationDbContext context, HybridCache hybridCac
         {
             query = query.OrderBy($"{filters.SortColumn} {filters.SortDirection}");
         }
-            
+
         var source = query
                         .Include(x => x.Answers)
                         .ProjectToType<QuestionResponse>()
@@ -44,16 +44,6 @@ public class QuestionService(ApplicationDbContext context, HybridCache hybridCac
 
     public async Task<Result<IEnumerable<QuestionResponse>>> GetAvailableAsync(int pollId, string userId, CancellationToken cancellationToken = default)
     {
-        //var hasVote = await _context.Votes.AnyAsync(x => x.PollId == pollId && x.UserId == userId, cancellationToken);
-
-        //if(hasVote)
-        //    return Result.Failure<IEnumerable<QuestionResponse>>(VotesErrors.DuplicatedVote);
-
-        //var pollIsExists = await _context.Polls.AnyAsync(x => x.Id == pollId && x.IsPublished && x.StartsAt <= DateOnly.FromDateTime(DateTime.UtcNow) && x.EndsAt >= DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
-
-        //if(!pollIsExists)
-        //    return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
-
         var cacheKey = $"{_cachePrefix}-{pollId}";
 
         var questions = await _hybridCache.GetOrCreateAsync<IEnumerable<QuestionResponse>>(

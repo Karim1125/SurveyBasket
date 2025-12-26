@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace SurveyBasket.Persistence;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor httpContextAccessor) : 
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor httpContextAccessor) :
     IdentityDbContext<ApplicationUser, ApplicationRole, string>(options)
 {
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
@@ -11,7 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Answer> Answers { get; set; }
     public DbSet<Poll> Polls { get; set; }
     public DbSet<Question> Questions { get; set; }
-    public DbSet<Vote>  Votes { get; set; }
+    public DbSet<Vote> Votes { get; set; }
     public DbSet<VoteAnswer> VoteAnswers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,16 +39,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             var currentUserId = _httpContextAccessor.HttpContext?.User?.GetUserId()!;
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedById = currentUserId; 
+                entry.Entity.CreatedById = currentUserId;
             }
-            else if(entry.State == EntityState.Modified)
+            else if (entry.State == EntityState.Modified)
             {
-                entry.Entity.UpdatedById = currentUserId; 
+                entry.Entity.UpdatedById = currentUserId;
                 entry.Entity.UpdatedOn = DateTime.UtcNow;
             }
         }
 
-
-            return base.SaveChangesAsync(cancellationToken);
+        return base.SaveChangesAsync(cancellationToken);
     }
 }

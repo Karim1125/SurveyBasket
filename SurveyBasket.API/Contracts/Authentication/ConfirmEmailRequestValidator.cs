@@ -9,6 +9,5 @@ public class ConfirmEmailRequestValidator : AbstractValidator<ConfirmEmailReques
 
         RuleFor(x => x.Code)
             .NotEmpty();
-        
     }
 }

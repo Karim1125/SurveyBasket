@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Contracts.Questions;
-
-namespace SurveyBasket.Services;
+﻿namespace SurveyBasket.Services;
 
 public class ResultService(ApplicationDbContext context) : IResultService
 {
@@ -37,7 +35,7 @@ public class ResultService(ApplicationDbContext context) : IResultService
 
         var votesPerDay = await _context.Votes
             .Where(v => v.PollId == pollId)
-            .GroupBy(v => new {Date = DateOnly.FromDateTime(v.SubmittedOn)})
+            .GroupBy(v => new { Date = DateOnly.FromDateTime(v.SubmittedOn) })
             .Select(g => new VotesPerDayResponse
             (
                 g.Key.Date,
@@ -61,7 +59,7 @@ public class ResultService(ApplicationDbContext context) : IResultService
             (
                 q.Question.Content,
                 q.Question.Votes
-                .GroupBy(a => new { AnswersId = a.Answer.Id, AnswerContent = a.Answer.Content})
+                .GroupBy(a => new { AnswersId = a.Answer.Id, AnswerContent = a.Answer.Content })
                     .Select(g => new VotesPerAnswerResponse
                     (
                         g.Key.AnswerContent,

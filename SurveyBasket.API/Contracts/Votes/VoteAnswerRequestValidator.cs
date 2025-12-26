@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Contracts.Votes;
-
-namespace SurveyBasket.Contracts.Votes;
+﻿namespace SurveyBasket.Contracts.Votes;
 
 public class VoteAnswerRequestValidator : AbstractValidator<VoteAnswerRequest>
 {

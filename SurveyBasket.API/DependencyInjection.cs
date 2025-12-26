@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Hangfire;
-using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.RateLimiting;
@@ -9,11 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using SurveyBasket.Authentication;
 using SurveyBasket.Health;
-using SurveyBasket.OpenAPITransformers;
 using SurveyBasket.OpenApiTransformers;
+using SurveyBasket.OpenAPITransformers;
 using SurveyBasket.Settings;
 using System.Reflection;
-using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -46,7 +44,6 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString));
 
         services
-            //.AddSwaggerServices()
             .AddMapsterConfig()
             .AddFluentValidationConfig();
 
@@ -66,10 +63,13 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
 
-        services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+        services.AddOptions<MailSettings>()
+            .BindConfiguration(nameof(MailSettings))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         services.AddHealthChecks()
-            .AddSqlServer(name: "database", connectionString: configuration.GetConnectionString("DefaultConnection")!)
+            .AddSqlServer(name: "database", connectionString: connectionString)
             .AddHangfire(options => { options.MinimumAvailableServers = 1; })
             .AddCheck<MailProviderHealthCheck>(name: "mail service");
 
@@ -80,7 +80,6 @@ public static class DependencyInjection
             options.DefaultApiVersion = new ApiVersion(1.0);
             options.AssumeDefaultVersionWhenUnspecified = true;
             options.ReportApiVersions = true;
-
             options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
         })
         .AddApiExplorer(options =>
@@ -113,41 +112,6 @@ public static class DependencyInjection
         return services;
     }
 
-    //private static IServiceCollection AddSwaggerServices(this IServiceCollection services)
-    //{
-    //    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-
-    //    services.AddSwaggerGen(options =>
-    //    {
-    //        //options.SwaggerDoc("v1", new OpenApiInfo
-    //        //{
-    //        //    Version = "v1",
-    //        //    Title = "ToDo API",
-    //        //    Description = "An ASP.NET Core Web API for managing ToDo items",
-    //        //    TermsOfService = new Uri("https://example.com/terms"),
-    //        //    Contact = new OpenApiContact
-    //        //    {
-    //        //        Name = "Example Contact",
-    //        //        Url = new Uri("https://example.com/contact")
-    //        //    },
-    //        //    License = new OpenApiLicense
-    //        //    {
-    //        //        Name = "Example License",
-    //        //        Url = new Uri("https://example.com/license")
-    //        //    }
-    //        //});
-
-    //        var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    //        options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-
-    //        options.OperationFilter<SwaggerDefaultValues>();
-    //    });
-
-    //    services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-
-    //    return services;
-    //}
-
     private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
     {
         var mappingConfig = TypeAdapterConfig.GlobalSettings;
@@ -177,10 +141,8 @@ public static class DependencyInjection
         services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
         services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
-
         services.AddSingleton<IJwtProvider, JwtProvider>();
 
-        //services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddOptions<JwtOptions>()
             .BindConfiguration(JwtOptions.SectionName)
             .ValidateDataAnnotations()
@@ -266,33 +228,6 @@ public static class DependencyInjection
                 options.QueueLimit = 100;
                 options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
             });
-
-            //rateLimiterOptions.AddTokenBucketLimiter("token", options =>
-            //{
-            //    options.TokenLimit = 2;
-            //    options.QueueLimit = 1;
-            //    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-            //    options.ReplenishmentPeriod = TimeSpan.FromSeconds(30);
-            //    options.TokensPerPeriod = 2;
-            //    options.AutoReplenishment = true;
-            //});
-
-            //rateLimiterOptions.AddFixedWindowLimiter("fixed", options =>
-            //{
-            //    options.PermitLimit = 2;
-            //    options.Window = TimeSpan.FromSeconds(20);
-            //    options.QueueLimit = 1;
-            //    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-            //});
-
-            //rateLimiterOptions.AddSlidingWindowLimiter("sliding", options =>
-            //{
-            //    options.PermitLimit = 2;
-            //    options.Window = TimeSpan.FromSeconds(20);
-            //    options.SegmentsPerWindow = 2;
-            //    options.QueueLimit = 1;
-            //    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-            //});
         });
 
         return services;

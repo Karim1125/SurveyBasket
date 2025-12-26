@@ -10,4 +10,3 @@ public class RefreshTokenRequestValidator : AbstractValidator<RefreshTokenReques
             .NotEmpty();
     }
 }
-

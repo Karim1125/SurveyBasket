@@ -7,6 +7,7 @@ namespace SurveyBasket.Controllers;
 [ApiVersion(2)]
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = DefaultRoles.Member.Name)]
 public class PollsController(IPollService pollService) : ControllerBase
 {
     private readonly IPollService _pollService = pollService;
@@ -20,9 +21,8 @@ public class PollsController(IPollService pollService) : ControllerBase
 
     [MapToApiVersion(1)]
     [HttpGet("current")]
-    [Authorize(Roles = DefaultRoles.Member)]
+    [Authorize(Roles = DefaultRoles.Member.Name)]
     [EnableRateLimiting(RateLimiters.UserLimiter)]
-    //[SwaggerIgnore]
     public async Task<IActionResult> GetCurrentV1(CancellationToken cancellationToken)
     {
         return Ok(await _pollService.GetCurrentAsyncV1(cancellationToken));
@@ -30,7 +30,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
     [MapToApiVersion(2)]
     [HttpGet("current")]
-    [Authorize(Roles = DefaultRoles.Member)]
+    [Authorize(Roles = DefaultRoles.Member.Name)]
     [EnableRateLimiting(RateLimiters.UserLimiter)]
     public async Task<IActionResult> GetCurrentV2(CancellationToken cancellationToken)
     {
@@ -75,7 +75,7 @@ public class PollsController(IPollService pollService) : ControllerBase
         return result.IsSuccess ? NoContent() : result.ToProblem();
     }
 
-    [HttpPut("{id}/togglePublish")]
+    [HttpPut("{id}/toggle-publish")]
     [HasPermission(Permissions.UpdatePolls)]
     public async Task<IActionResult> TogglePublish([FromRoute] int id, CancellationToken cancellationToken)
     {

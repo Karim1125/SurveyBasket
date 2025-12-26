@@ -7,6 +7,7 @@ global using Microsoft.AspNetCore.Identity;
 global using Mapster;
 global using MapsterMapper;
 global using FluentValidation;
+global using System.ComponentModel.DataAnnotations;
 
 global using SurveyBasket.Entities;
 global using SurveyBasket.Services;

@@ -31,7 +31,7 @@ public class AuthService(
         if (await _userManager.FindByEmailAsync(email) is not { } user)
             return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-        if(user.IsDisabled)
+        if (user.IsDisabled)
             return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
 
         var result = await _signInManager.PasswordSignInAsync(user, password, false, true);
@@ -185,7 +185,7 @@ public class AuthService(
 
         if (result.Succeeded)
         {
-            await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
+            await _userManager.AddToRoleAsync(user, DefaultRoles.Member.Name);
             return Result.Success();
         }
 
@@ -200,7 +200,7 @@ public class AuthService(
             return Result.Success();
 
         if (user.EmailConfirmed)
-            return Result.Failure(UserErrors.DuplicatedConfirmation);
+            return Result.Failure(UserErrors.DuplicatedConfirmation with { StatusCode = StatusCodes.Status400BadRequest });
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -255,6 +255,7 @@ public class AuthService(
         var error = result.Errors.First();
         return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status401Unauthorized));
     }
+
     private static string GenerateRefreshToken()
     {
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
@@ -293,20 +294,10 @@ public class AuthService(
 
         await Task.CompletedTask;
     }
-    private async Task<(IEnumerable<string> roles, IEnumerable<string> permissions)> GetUserRolesAndPermissions(ApplicationUser user, CancellationToken cancellationToken) 
+
+    private async Task<(IEnumerable<string> roles, IEnumerable<string> permissions)> GetUserRolesAndPermissions(ApplicationUser user, CancellationToken cancellationToken)
     {
         var userRoles = await _userManager.GetRolesAsync(user);
-
-        //var userPermissions = await _context.Roles
-        //    .Join(_context.RoleClaims,
-        //        role => role.Id,
-        //        claim => claim.RoleId,
-        //        (role, claim) => new { role, claim }
-        //    )
-        //    .Where(x => userRoles.Contains(x.role.Name!))
-        //    .Select(x => x.claim.ClaimValue!)
-        //    .Distinct()
-        //    .ToListAsync(cancellationToken);
 
         var userPermissions = await (from r in _context.Roles
                                      join p in _context.RoleClaims

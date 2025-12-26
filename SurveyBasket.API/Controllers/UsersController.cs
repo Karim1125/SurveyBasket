@@ -17,7 +17,7 @@ public class UsersController(IUserService userService) : ControllerBase
 
     [HttpGet("{id}")]
     [HasPermission(Permissions.GetUsers)]
-    public async Task<IActionResult> Get([FromRoute]string id,CancellationToken cancellationToken)
+    public async Task<IActionResult> Get([FromRoute] string id, CancellationToken cancellationToken)
     {
         var result = await _userService.GetAsync(id);
 
@@ -26,7 +26,7 @@ public class UsersController(IUserService userService) : ControllerBase
 
     [HttpPost("")]
     [HasPermission(Permissions.GetUsers)]
-    public async Task<IActionResult> Add([FromBody]CreateUserRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Add([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
     {
         var result = await _userService.AddAsync(request, cancellationToken);
 
@@ -35,23 +35,22 @@ public class UsersController(IUserService userService) : ControllerBase
 
     [HttpPut("{id}")]
     [HasPermission(Permissions.UpdateUsers)]
-    public async Task<IActionResult> Update([FromRoute]string id,[FromBody]UpdateUserRequest request,CancellationToken cancellationToken)
+    public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
     {
-        var result = await _userService.UpdateAsync(id,request, cancellationToken);
+        var result = await _userService.UpdateAsync(id, request, cancellationToken);
 
         return result.IsSuccess ? NoContent() : result.ToProblem();
     }
 
     [HttpPut("{id}/toggle-status")]
     [HasPermission(Permissions.UpdateUsers)]
-    public async Task<IActionResult> ToggleStatus([FromRoute]string id)
+    public async Task<IActionResult> ToggleStatus([FromRoute] string id)
     {
         var result = await _userService.ToggleStatusAsync(id);
 
         return result.IsSuccess ? NoContent() : result.ToProblem();
     }
 
-    
     [HttpPut("{id}/unlcok")]
     [HasPermission(Permissions.UpdateRoles)]
     public async Task<IActionResult> Unlcok([FromRoute] string id)

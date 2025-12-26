@@ -21,8 +21,6 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
-    //app.UseSwagger();
-    //app.UseSwaggerUI();
 }
 
 app.UseSerilogRequestLogging();
@@ -40,7 +38,6 @@ app.UseHangfireDashboard("/jobs", new DashboardOptions
         }
     ],
     DashboardTitle = "Survey Basket Dashboard",
-    //IsReadOnlyFunc = (DashboardContext conext) => true
 });
 
 var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
